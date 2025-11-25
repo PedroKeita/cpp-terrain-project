@@ -1,51 +1,39 @@
+#include <QApplication>
+#include <QMainWindow>
+#include "opengl/OpenGLWidget.h"
+#include "terrain/TerrainGenerator.h"
 #include <iostream>
-#include "TerrainGenerator.h"
-#include "MeshBuilder.h"
 
-int main() {
-    // Dimensões do terreno
-    int width = 5;
-    int height = 5;
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
+    QMainWindow window;
 
-    // Criar o gerador de terreno
-    TerrainGenerator terrainGen(width, height);
-
-    // Definir gradientes manualmente
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            double dx = x * 0.1;   // exemplo de derivada x
-            double dy = y * 0.05;  // exemplo de derivada y
-            terrainGen.setGradient(x, y, dx, dy);
-        }
-    }
-
-    // Gerar o mapa de alturas
+    // Gera altura
+    GradientField* field = new GradientField(100, 100);
+    for (int y = 0; y < 100; y++)
+        for (int x = 0; x < 100; x++)
+            field->setGradient(x, y, sin(x * 0.1), cos(y * 0.1));
+    TerrainGenerator terrainGen(100, 100, field);
     Eigen::MatrixXd heightMap = terrainGen.generate();
 
-    std::cout << "Mapa de alturas gerado:\n" << heightMap << "\n\n";
+    std::cout << "Altura mínima = " << heightMap.minCoeff() << "\n";
+    std::cout << "Altura máxima = " << heightMap.maxCoeff() << "\n";
 
-    // Construir a malha
-    std::vector<Vertex> vertices;
-    std::vector<Face> faces;
-    MeshBuilder::buildMesh(heightMap, vertices, faces);
 
-    std::cout << "Vertices gerados: " << vertices.size() << "\n";
-    std::cout << "Faces geradas: " << faces.size() << "\n";
+    // Cria OpenGLWidget único
+    OpenGLWidget* ogl = new OpenGLWidget;
 
-    // Imprimir alguns vertices e faces de exemplo
-    for (size_t i = 0; i < vertices.size() && i < 5; ++i) {
-        std::cout << "Vertex " << i << ": ("
-                  << vertices[i].x << ", "
-                  << vertices[i].y << ", "
-                  << vertices[i].z << ")\n";
-    }
+    // Passa heightmap
+    ogl->setHeightMap(heightMap);
 
-    for (size_t i = 0; i < faces.size() && i < 5; ++i) {
-        std::cout << "Face " << i << ": ("
-                  << faces[i].v1 << ", "
-                  << faces[i].v2 << ", "
-                  << faces[i].v3 << ")\n";
-    }
+    // Passa campo de gradiente
+    ogl->setGradientField(field);
 
-    return 0;
+    // Coloca na janela
+    window.setCentralWidget(ogl);
+    window.resize(800, 600);
+    window.show();
+
+    return a.exec();
 }

@@ -1,27 +1,48 @@
 #include "PoissonSolver.h"
+#include <iostream>
 
 PoissonSolver::PoissonSolver(const GradientField& grad) : gradient(grad) {}
 
 Eigen::MatrixXd PoissonSolver::solve() {
-    int w = gradient.getWidth();
-    int h = gradient.getHeight();
-
+    int w = gradient.width();
+    int h = gradient.height();
     Eigen::MatrixXd height = Eigen::MatrixXd::Zero(h, w);
 
-    for(int y = 1; y < h; ++y)
-        height(y, 0) = height(y-1, 0) + gradient.getGradient(0, y)[1];
+    std::cout << "DEBUG: PoissonSolver solving for " << w << "x" << h << std::endl;
 
-    for(int x = 1; x < w; ++x)
-        height(0, x) = height(0, x-1) + gradient.getGradient(x, 0)[0];
+    // Integração mais robusta - múltiplas passes
+    for (int pass = 0; pass < 3; ++pass) {
+        for(int y = 0; y < h; ++y) {
+            for(int x = 0; x < w; ++x) {
+                double sum = 0.0;
+                int count = 0;
 
-    for(int y = 1; y < h; ++y)
-        for(int x = 1; x < w; ++x)
-        {
-            double fromLeft  = height(y, x-1) + gradient.getGradient(x, y)[0];
-            double fromTop   = height(y-1, x) + gradient.getGradient(x, y)[1];
-            height(y, x) = (fromLeft + fromTop) * 0.5;
+                if (x > 0) {
+                    sum += height(y, x-1) + gradient.getGradient(x-1, y)[0];
+                    count++;
+                }
+                if (y > 0) {
+                    sum += height(y-1, x) + gradient.getGradient(x, y-1)[1];
+                    count++;
+                }
+                if (x < w-1) {
+                    sum += height(y, x+1) - gradient.getGradient(x, y)[0];
+                    count++;
+                }
+                if (y < h-1) {
+                    sum += height(y+1, x) - gradient.getGradient(x, y)[1];
+                    count++;
+                }
+
+                if (count > 0) {
+                    height(y, x) = sum / count;
+                }
+            }
         }
+    }
+
+    std::cout << "DEBUG: PoissonSolver finished - Min: " << height.minCoeff()
+              << " Max: " << height.maxCoeff() << std::endl;
 
     return height;
 }
-

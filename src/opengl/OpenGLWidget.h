@@ -25,19 +25,30 @@ protected:
 
     void mousePressEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
+    void mouseReleaseEvent(QMouseEvent *e) override;
     void wheelEvent(QWheelEvent *event) override;
 
 private:
+    QPoint screenToTerrain(const QPoint& p);
+    void applyBrushStroke(const QPoint& tPos, const QPoint& tPrev);
+
     Eigen::MatrixXd m_heightMap;
     GradientField* gradField = nullptr;
+
     bool hasHeightMap = false;
+    bool painting = false;     // botão esquerdo
+    bool rotating = false;     // botão direito
 
     QPoint lastMouse;
 
-    // Câmera
-    float cameraRotX = 35.0f;
+    float brushStrength = 1.0f;
+    float brushRadius = 3.0f;
+
+    // --- Câmera ---
+    float cameraRotX = 45.0f;
     float cameraRotY = -45.0f;
-    float cameraDist = 3.5f;
+    float cameraDist = 50.0f;
+    float heightOffset = 7.5f;
 };
 
 #endif

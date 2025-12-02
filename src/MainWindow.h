@@ -1,30 +1,25 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
-
+#pragma once
 #include <QMainWindow>
-#include <QPushButton>
 #include <QStackedWidget>
+#include <QImage>
 
-#include "widget/PaintWidget.h"
-#include "opengl/OpenGLWidget.h"
+class PaintWidget;
+class QPushButton;
+class GradientField;
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
-
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
-
-private:
-    QStackedWidget *stack;
-    PaintWidget *paintWidget;
-    OpenGLWidget *openGLWidget;
-    QPushButton *generateButton;
-
-    QImage currentDrawing;
-
-private slots:
+    MainWindow(QWidget* parent = nullptr);
+public slots:
     void onGenerateTerrain();
+    void onBackToDrawing();
+private:
+    QStackedWidget* stack;
+    PaintWidget* paintWidget;
+    QWidget* page1;
+    QWidget* page2;
+    QPushButton* generateButton;
+    QPushButton* backButton;
+    GradientField* sharedGradient = nullptr;
 };
-
-#endif

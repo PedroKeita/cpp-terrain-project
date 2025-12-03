@@ -1,6 +1,8 @@
 #ifndef SHOW_TERRAIN_H
 #define SHOW_TERRAIN_H
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include "../external/libigl/include/igl/opengl/glfw/Viewer.h"
 #include <Eigen/Core>
 #include <cmath>

@@ -54,6 +54,8 @@ add_executable(cpp-terrain-project ${SRC}
         main.cpp
         src/TerrainGenerator.cpp
         src/TerrainGenerator.h
+        src/PerlinNoise.cpp
+        src/PerlinNoise.h
 )
 
 target_link_libraries(cpp-terrain-project

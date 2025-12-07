@@ -4,6 +4,8 @@
 #include <QImage>
 #include <QSlider>
 #include <QLabel>
+#include <Eigen/Core>
+
 
 class PaintWidget;
 class QPushButton;
@@ -28,4 +30,5 @@ private:
     QSlider* brushSlider;
     QLabel* brushLabel;
     GradientField* sharedGradient = nullptr;
+    void applySoftErosion(Eigen::MatrixXd& heightmap, int interations);
 };

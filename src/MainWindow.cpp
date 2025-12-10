@@ -1,3 +1,16 @@
+/**
+ * @file MainWindow.cpp
+ * @brief Implementação da janela principal da aplicação de geração de terreno 3D.
+ *
+ * Esta classe gerencia:
+ * - Interface gráfica do usuário
+ * - Página de desenho
+ * - Página de visualização 3D
+ * - Conversão do desenho em mapa de alturas
+ * - Aplicação de ruído, suavização e erosão
+ * - Envio do heightmap para o renderizador 3D
+ */
+
 #include "MainWindow.h"
 #include "PaintWidget.h"
 #include "ShowTerrain.h"
@@ -12,6 +25,10 @@
 #include "PerlinNoise.h"
 #include "ImageToGradient.h"
 
+/**
+ * @brief Constrói a janela principal e inicializa toda a interface gráfica.
+ * @param parent Widget pai da janela principal.
+ */
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
 {
@@ -207,12 +224,33 @@ MainWindow::MainWindow(QWidget* parent)
     resize(1000, 750);
 }
 
+/**
+ * @brief Atualiza o tamanho do pincel ao mover o slider.
+ * @param size Tamanho do pincel em pixels.
+ *
+ * Slot conectado ao sinal QSlider::valueChanged.
+ */
 void MainWindow::onBrushSizeChanged(int size)
 {
     paintWidget->setBrushSize(size);
     brushLabel->setText(QString::number(size) + "px");
 }
 
+/**
+ * @brief Processa o desenho e gera o terreno 3D.
+ *
+ * Passos executados:
+ * - Captura o desenho do usuário
+ * - Redimensiona imagem
+ * - Extrai gradiente com Sobel
+ * - Calcula distância até pontos desenhados
+ * - Forma base da montanha
+ * - Aplica ruído Perlin multiescala
+ * - Suaviza e aplica erosão leve
+ * - Envia heightmap ao renderizador 3D
+ *
+ * Slot conectado ao botão "Gerar Terreno 3D".
+ */
 void MainWindow::onGenerateTerrain()
 {
     QImage img = paintWidget->getImage();
@@ -435,12 +473,26 @@ void MainWindow::onGenerateTerrain()
     showTerrain(heightmap);
 }
 
+/**
+ * @brief Retorna da página de visualização 3D para a página de desenho.
+ *
+ * Slot conectado ao botão de voltar.
+ */
 void MainWindow::onBackToDrawing()
 {
     stack->setCurrentIndex(0);
 }
 
-
+/**
+ * @brief Aplica erosão suave no heightmap para reduzir ângulos bruscos.
+ *
+ * A erosão funciona reduzindo alturas onde existe uma diferença
+ * significativa em relação a vizinhos mais baixos, simulando
+ * desmoronamento de areia/solo.
+ *
+ * @param heightmap Matriz de alturas a ser modificada.
+ * @param iterations Quantidade de iterações de erosão aplicadas.
+ */
 void MainWindow::applySoftErosion(Eigen::MatrixXd& heightmap, int iterations) {
     int h = heightmap.rows();
     int w = heightmap.cols();
@@ -464,7 +516,7 @@ void MainWindow::applySoftErosion(Eigen::MatrixXd& heightmap, int iterations) {
                     }
                 }
 
-                // Se houver diferença significativa, suavizar
+                // Suavização com erosão
                 double diff = current - minNeighbor;
                 if (diff > 10.0) { // Limiar para erosão
                     // Transferir um pouco de material para baixo

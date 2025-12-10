@@ -46,8 +46,6 @@ file(GLOB SRC
 )
 
 add_executable(cpp-terrain-project ${SRC}
-        src/PoissonSolver.cpp
-        src/PoissonSolver.cpp
         src/ShowTerrain.cpp
         src/ShowTerrain.h
         main.cpp

@@ -1,9 +1,30 @@
+/**
+* @file PerlinNoise.cpp
+ * @brief Implementação da classe PerlinNoise para geração de ruído suave 3D.
+ *
+ * Esta classe implementa o algoritmo clássico de Perlin Noise, criado por Ken Perlin.
+ * O ruído gerado é contínuo, suave e amplamente utilizado em:
+ *  - Geração de terrenos
+ *  - Efeitos naturais (nuvens, fogo, água)
+ *  - Sombreamento procedural
+ *  - Texturas geradas por programação
+ *
+ * A classe suporta ruído clássico 3D e ruído multi-oitavas.
+ */
+
 #include "PerlinNoise.h"
 #include <algorithm>
 #include <numeric>
 #include <random>
 #include <cmath>
 
+/**
+ * @brief Construtor padrão usando a permutação clássica de Ken Perlin.
+ *
+ * Esta tabela de permutação produz um ruído determinístico padrão.
+ * O vetor interno `p` contém 512 elementos onde os primeiros 256 são
+ * duplicados no final, facilitando operações com wrap-around.
+ */
 PerlinNoise::PerlinNoise() {
     // Permutação padrão de Ken Perlin
     std::vector<int> permutation = {
@@ -32,6 +53,14 @@ PerlinNoise::PerlinNoise() {
     }
 }
 
+/**
+ * @brief Construtor que utiliza uma semente (seed) para gerar permutação aleatória.
+ *
+ * @param seed Valor para inicializar o gerador determinístico.
+ *
+ * Este método cria uma variação diferente do ruído puramente baseada na semente,
+ * permitindo geração procedural reprodutível.
+ */
 PerlinNoise::PerlinNoise(unsigned int seed) {
     p.resize(512);
     std::vector<int> permutation(256);
@@ -45,14 +74,41 @@ PerlinNoise::PerlinNoise(unsigned int seed) {
     }
 }
 
+/**
+ * @brief Função de suavização (fade) usada por Ken Perlin.
+ *
+ * A função:
+ *      6t⁵ - 15t⁴ + 10t³
+ *
+ * fornece suavidade C2 (continuidade de segunda derivada),
+ * essencial para eliminar artefatos.
+ */
 double PerlinNoise::fade(double t) {
     return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
+
+/**
+ * @brief Interpolação linear (lerp).
+ *
+ * @param t Parâmetro de interpolação (0 → a, 1 → b)
+ * @param a Valor inicial
+ * @param b Valor final
+ */
 double PerlinNoise::lerp(double t, double a, double b) {
     return a + t * (b - a);
 }
 
+/**
+ * @brief Calcula o dot-product entre o gradiente pseudo-aleatório e o vetor deslocamento.
+ *
+ * @param hash Hash do gradiente gerado pela permutação
+ * @param x offset X
+ * @param y offset Y
+ * @param z offset Z
+ *
+ * A escolha dos gradientes depende dos 4 bits mais baixos do hash.
+ */
 double PerlinNoise::grad(int hash, double x, double y, double z) {
     int h = hash & 15;
     double u = h < 8 ? x : y;
@@ -60,24 +116,38 @@ double PerlinNoise::grad(int hash, double x, double y, double z) {
     return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 }
 
-
-
+/**
+ * @brief Calcula o Perlin Noise 3D.
+ *
+ * A função segue a implementação original combinando:
+ *  - Gradientes
+ *  - Fade curves
+ *  - Interpolação trilinear
+ *
+ * @param x Coordenada X
+ * @param y Coordenada Y
+ * @param z Coordenada Z
+ *
+ * @return Valor do ruído entre [-1, 1]
+ */
 double PerlinNoise::noise(double x, double y, double z) {
 
-
-    // Versão 3D original
+    // Localiza células de grade
     int X = (int)floor(x) & 255;
     int Y = (int)floor(y) & 255;
     int Z = (int)floor(z) & 255;
 
+    // Distâncias internas
     x -= floor(x);
     y -= floor(y);
     z -= floor(z);
 
+    // Curvas de suavização
     double u = fade(x);
     double v = fade(y);
     double w = fade(z);
 
+    // Hashes das 8 esquinas da célula
     int A = p[X] + Y;
     int AA = p[A] + Z;
     int AB = p[A + 1] + Z;
@@ -85,6 +155,7 @@ double PerlinNoise::noise(double x, double y, double z) {
     int BA = p[B] + Z;
     int BB = p[B + 1] + Z;
 
+    // Interpolação trilinear completa
     return lerp(w, lerp(v, lerp(u, grad(p[AA], x, y, z),
                                    grad(p[BA], x - 1, y, z)),
                            lerp(u, grad(p[AB], x, y - 1, z),
@@ -95,6 +166,20 @@ double PerlinNoise::noise(double x, double y, double z) {
                                    grad(p[BB + 1], x - 1, y - 1, z - 1))));
 }
 
+/**
+ * @brief Gera Perlin Noise de múltiplas oitavas (fractal noise).
+ *
+ * @param x Coordenada X
+ * @param y Coordenada Y
+ * @param octaves Número de oitavas (camadas)
+ * @param persistence Redução da amplitude a cada oitava (0–1)
+ *
+ * O ruído final é uma soma ponderada de várias camadas:
+ *
+ *      total += noise(x * freq) * amp
+ *
+ * @return Valor normalizado do ruído em [-1, 1]
+ */
 double PerlinNoise::octaveNoise(double x, double y, int octaves, double persistence) {
     double total = 0.0;
     double frequency = 1.0;

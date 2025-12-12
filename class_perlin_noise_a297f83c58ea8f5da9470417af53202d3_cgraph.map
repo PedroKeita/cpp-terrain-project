@@ -1,0 +1,5 @@
+<map id="PerlinNoise::octaveNoise" name="PerlinNoise::octaveNoise">
+<area shape="rect" id="Node000001" title="Multi&#45;octave fractal noise." alt="" coords="5,5,191,31"/>
+<area shape="rect" id="Node000002" href="$class_perlin_noise.html#ab955ab0bdd44649d13f8e17c81699972" title="3D Perlin noise value" alt="" coords="239,5,377,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,15,225,15,225,21,191,21"/>
+</map>

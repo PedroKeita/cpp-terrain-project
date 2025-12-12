@@ -1,0 +1,9 @@
+<map id="include/terrain&#45;generator/PaintWidget.h" name="include/terrain&#45;generator/PaintWidget.h">
+<area shape="rect" id="Node000001" title="Canvas for drawing 2D terrain profiles." alt="" coords="53,5,237,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,84,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="122,48,72,87,69,82,119,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="108,93,181,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="147,46,147,79,142,79,142,46"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="205,93,271,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="169,44,215,82,212,86,166,48"/>
+</map>

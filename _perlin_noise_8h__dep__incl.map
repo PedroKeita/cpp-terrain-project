@@ -1,0 +1,7 @@
+<map id="include/terrain&#45;generator/PerlinNoise.h" name="include/terrain&#45;generator/PerlinNoise.h">
+<area shape="rect" id="Node000001" title="Ken Perlin&#39;s improved noise algorithm implementation." alt="" coords="104,5,288,45"/>
+<area shape="rect" id="Node000002" href="$_perlin_noise_8cpp.html" title="Implementation of PerlinNoise class for 3D smooth noise generation." alt="" coords="5,93,184,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,56,111,95,108,91,159,52"/>
+<area shape="rect" id="Node000003" href="$_main_window_8cpp.html" title="Implementation of the main window for 3D terrain generation application." alt="" coords="208,93,387,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="233,52,284,91,281,95,230,56"/>
+</map>

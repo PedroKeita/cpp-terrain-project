@@ -1,0 +1,13 @@
+<map id="MainWindow::onGenerateTerrain" name="MainWindow::onGenerateTerrain">
+<area shape="rect" id="Node000001" title="Slot for generating terrain from user drawing." alt="" coords="5,80,239,105"/>
+<area shape="rect" id="Node000002" href="$class_image_to_gradient.html#a518f8b1377f5144dd434f3abb8410a09" title="Convert QImage to gradient matrices." alt="" coords="287,5,477,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,77,286,39,315,32,316,37,287,45,164,82"/>
+<area shape="rect" id="Node000003" href="$class_paint_widget.html#a8da576a5a97d08cd5424593a9076176a" title="Retrieve current drawing." alt="" coords="297,55,467,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="239,79,283,74,283,80,239,84"/>
+<area shape="rect" id="Node000004" href="$class_perlin_noise.html#a297f83c58ea8f5da9470417af53202d3" title="Multi&#45;octave fractal noise." alt="" coords="289,104,475,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="239,101,276,104,275,110,239,106"/>
+<area shape="rect" id="Node000006" href="$_show_terrain_8cpp.html#a65023590913832018da7c4a84e6a0d18" title="Launches interactive 3D terrain viewer." alt="" coords="332,153,432,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="166,103,287,138,320,147,319,152,286,143,165,108"/>
+<area shape="rect" id="Node000005" href="$class_perlin_noise.html#ab955ab0bdd44649d13f8e17c81699972" title="3D Perlin noise value" alt="" coords="525,104,664,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="475,114,512,114,512,119,475,119"/>
+</map>

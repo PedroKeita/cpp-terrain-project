@@ -1,0 +1,5 @@
+<map id="MainWindow::onBrushSizeChanged" name="MainWindow::onBrushSizeChanged">
+<area shape="rect" id="Node000001" title="Slot for updating brush size based on slider value." alt="" coords="5,5,256,31"/>
+<area shape="rect" id="Node000002" href="$class_paint_widget.html#aaa4c5c1391790da1de513bf976fea79e" title="Set brush diameter in pixels." alt="" coords="304,5,496,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="256,15,290,15,290,21,256,21"/>
+</map>

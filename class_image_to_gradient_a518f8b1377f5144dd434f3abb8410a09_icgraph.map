@@ -1,0 +1,7 @@
+<map id="ImageToGradient::convert" name="ImageToGradient::convert">
+<area shape="rect" id="Node000001" title="Convert QImage to gradient matrices." alt="" coords="532,5,723,31"/>
+<area shape="rect" id="Node000002" href="$class_main_window.html#a31b83022363eacb1151439489d2dbd00" title="Slot for generating terrain from user drawing." alt="" coords="251,5,484,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="518,21,484,21,484,15,518,15"/>
+<area shape="rect" id="Node000003" href="$class_main_window.html#a996c5a2b6f77944776856f08ec30858d" title="&lt; Required for Qt signal/slot mechanism" alt="" coords="5,5,203,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="237,21,203,21,203,15,237,15"/>
+</map>

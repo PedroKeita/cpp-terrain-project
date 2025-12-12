@@ -1,0 +1,5 @@
+<map id="include/terrain&#45;generator/MainWindow.h" name="include/terrain&#45;generator/MainWindow.h">
+<area shape="rect" id="Node000001" title="Main application window for 3D Terrain Generator." alt="" coords="5,5,189,45"/>
+<area shape="rect" id="Node000002" href="$_main_window_8cpp.html" title="Implementation of the main window for 3D terrain generation application." alt="" coords="8,93,187,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,59,100,93,95,93,95,59"/>
+</map>

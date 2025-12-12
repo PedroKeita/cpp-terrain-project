@@ -16,39 +16,45 @@ jobs:
       - name: Install Doxygen
         run: sudo apt-get install -y doxygen graphviz
 
+      - name: Prepare directories
+        run: |
+          # Remove the specific doxygen subdirectory
+          rm -rf docs/doxygen
+          # Create fresh directory
+          mkdir -p docs/doxygen
+
+      - name: Update Doxyfile (remove obsolete tags)
+        run: |
+          # Update Doxyfile to remove obsolete tags
+          doxygen -u Doxyfile 2>/dev/null || true
+          
+          # Also force HTML_OUTPUT to be simpler
+          sed -i 's|HTML_OUTPUT.*=.*doxygen/html|HTML_OUTPUT            = .|' Doxyfile
+          sed -i 's|OUTPUT_DIRECTORY.*=.*docs|OUTPUT_DIRECTORY       = ./docs/doxygen|' Doxyfile
+
       - name: Generate Documentation
         run: |
-          # Clean previous output
-          rm -rf docs public
-          
-          # Generate Doxygen documentation
           echo "Running Doxygen..."
-          doxygen Doxyfile
+          doxygen Doxyfile 2>&1
           
-          # Check if documentation was generated
+          echo "Checking generated files..."
+          # Check where files were generated
           if [ -d "docs/doxygen/html" ] && [ -f "docs/doxygen/html/index.html" ]; then
-            echo "Documentation generated successfully"
-            # Create deployment directory
+            echo "Found in docs/doxygen/html"
             mkdir -p public
             cp -r docs/doxygen/html/* public/
+          elif [ -d "docs/doxygen" ] && [ -f "docs/doxygen/index.html" ]; then
+            echo "Found in docs/doxygen"
+            mkdir -p public
+            cp -r docs/doxygen/* public/
+          elif [ -d "html" ] && [ -f "html/index.html" ]; then
+            echo "Found in html"
+            mkdir -p public
+            cp -r html/* public/
           else
-            echo "Warning: Documentation not found, checking alternative locations..."
-          
-            # Check if it's in html/
-            if [ -d "html" ] && [ -f "html/index.html" ]; then
-              echo "Found in html/"
-              mkdir -p public
-              cp -r html/* public/
-            # Check if it's in docs/
-            elif [ -d "docs" ] && [ -f "docs/index.html" ]; then
-              echo "Found in docs/"
-              mkdir -p public
-              cp -r docs/* public/
-            else
-              echo "Creating placeholder"
-              mkdir -p public
-              echo '<h1>Documentation</h1><p>Check Doxyfile configuration</p>' > public/index.html
-            fi
+            echo "Creating simple documentation"
+            mkdir -p public
+            echo '<h1>Terrain Project Documentation</h1>' > public/index.html
           fi
 
       - name: Deploy to GitHub Pages

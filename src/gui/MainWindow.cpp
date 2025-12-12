@@ -1,20 +1,19 @@
 /**
  * @file MainWindow.cpp
- * @brief Implementação da janela principal da aplicação de geração de terreno 3D.
+ * @brief Implementation of the main window for 3D terrain generation application.
  *
- * Esta classe gerencia:
- * - Interface gráfica do usuário
- * - Página de desenho
- * - Página de visualização 3D
- * - Conversão do desenho em mapa de alturas
- * - Aplicação de ruído, suavização e erosão
- * - Envio do heightmap para o renderizador 3D
+ * This class manages:
+ * - User graphical interface
+ * - Drawing page
+ * - 3D visualization page
+ * - Conversion of drawing to heightmap
+ * - Application of noise, smoothing and erosion
+ * - Sending heightmap to 3D renderer
  */
 
-#include "MainWindow.h"
-#include "PaintWidget.h"
-#include "ShowTerrain.h"
-#include <QVBoxLayout>
+#include "../../include/terrain-generator/MainWindow.h"
+#include "../../include/terrain-generator/PaintWidget.h"
+#include "../../include/terrain-generator/ShowTerrain.h"
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QStackedWidget>
@@ -22,17 +21,17 @@
 #include <QSlider>
 #include <QFrame>
 #include <QApplication>
-#include "PerlinNoise.h"
-#include "ImageToGradient.h"
+#include "../../include/terrain-generator/PerlinNoise.h"
+#include "../../include/terrain-generator/ImageToGradient.h"
 
 /**
- * @brief Constrói a janela principal e inicializa toda a interface gráfica.
- * @param parent Widget pai da janela principal.
+ * @brief Constructs the main window and initializes the entire graphical interface.
+ * @param parent Parent widget of the main window.
  */
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
 {
-    // Estilo global escuro e moderno
+    // Global dark and modern style
     QString style = R"(
         * {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -119,17 +118,17 @@ MainWindow::MainWindow(QWidget* parent)
 
     stack = new QStackedWidget(this);
 
-    // ========== PAGINA 1 - DESENHO ==========
+    // ========== PAGE 1 - DRAWING ==========
     page1 = new QWidget();
     QVBoxLayout* mainLayout = new QVBoxLayout(page1);
     mainLayout->setContentsMargins(30, 30, 30, 30);
     mainLayout->setSpacing(20);
 
     // Header
-    QLabel* titleLabel = new QLabel("Gerador de Terreno 3D");
+    QLabel* titleLabel = new QLabel("3D Terrain Generator");
     titleLabel->setObjectName("title");
 
-    QLabel* subtitleLabel = new QLabel("Desenhe o perfil do terreno - a linha define o topo da montanha");
+    QLabel* subtitleLabel = new QLabel("Draw the terrain profile - the line defines the mountain top");
     subtitleLabel->setObjectName("subtitle");
 
     // Toolbar
@@ -140,7 +139,7 @@ MainWindow::MainWindow(QWidget* parent)
     toolbarLayout->setSpacing(20);
 
     // Brush size
-    QLabel* brushIcon = new QLabel("Pincel:");
+    QLabel* brushIcon = new QLabel("Brush:");
     brushSlider = new QSlider(Qt::Horizontal);
     brushSlider->setRange(1, 20);
     brushSlider->setValue(4);
@@ -149,8 +148,8 @@ MainWindow::MainWindow(QWidget* parent)
     brushLabel = new QLabel("4px");
     brushLabel->setFixedWidth(40);
 
-    // Botao limpar
-    clearButton = new QPushButton("Limpar");
+    // Clear button
+    clearButton = new QPushButton("Clear");
     clearButton->setObjectName("clearBtn");
     clearButton->setFixedWidth(100);
 
@@ -160,7 +159,7 @@ MainWindow::MainWindow(QWidget* parent)
     toolbarLayout->addStretch();
     toolbarLayout->addWidget(clearButton);
 
-    // Canvas de desenho
+    // Drawing canvas
     QFrame* canvasFrame = new QFrame();
     canvasFrame->setObjectName("canvas");
     QVBoxLayout* canvasLayout = new QVBoxLayout(canvasFrame);
@@ -170,8 +169,8 @@ MainWindow::MainWindow(QWidget* parent)
     paintWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     canvasLayout->addWidget(paintWidget);
 
-    // Botao gerar
-    generateButton = new QPushButton("Gerar Terreno 3D");
+    // Generate button
+    generateButton = new QPushButton("Generate 3D Terrain");
     generateButton->setObjectName("generateBtn");
     generateButton->setCursor(Qt::PointingHandCursor);
 
@@ -182,22 +181,22 @@ MainWindow::MainWindow(QWidget* parent)
     mainLayout->addWidget(canvasFrame, 1);
     mainLayout->addWidget(generateButton, 0, Qt::AlignCenter);
 
-    // ========== PAGINA 2 - VISUALIZADOR ==========
+    // ========== PAGE 2 - VISUALIZER ==========
     page2 = new QWidget();
     QVBoxLayout* layout2 = new QVBoxLayout(page2);
     layout2->setContentsMargins(30, 30, 30, 30);
     layout2->setSpacing(20);
 
-    // Header pagina 2
-    backButton = new QPushButton("<-  Voltar ao Desenho");
+    // Page 2 header
+    backButton = new QPushButton("<-  Back to Drawing");
     backButton->setObjectName("backBtn");
     backButton->setCursor(Qt::PointingHandCursor);
     backButton->setFixedWidth(200);
 
-    QLabel* viewerTitle = new QLabel("Visualizador 3D");
+    QLabel* viewerTitle = new QLabel("3D Visualizer");
     viewerTitle->setObjectName("title");
 
-    QLabel* viewerInfo = new QLabel("O terreno foi gerado em uma janela separada.\n\nControles:\n- Arrastar mouse: Rotacionar\n- Scroll: Zoom\n- Shift + Arrastar: Mover\n- L: Wireframe\n- O: Ortografico/Perspectiva\n- ESC: Fechar");
+    QLabel* viewerInfo = new QLabel("The terrain has been generated in a separate window.\n\nControls:\n- Drag mouse: Rotate\n- Scroll: Zoom\n- Shift + Drag: Move\n- L: Wireframe\n- O: Orthographic/Perspective\n- ESC: Close");
     viewerInfo->setStyleSheet("color: #888888; font-size: 14px; line-height: 1.6;");
     viewerInfo->setAlignment(Qt::AlignCenter);
 
@@ -212,7 +211,7 @@ MainWindow::MainWindow(QWidget* parent)
     stack->addWidget(page2);
     setCentralWidget(stack);
 
-    // Conexoes
+    // Connections
     connect(generateButton, &QPushButton::clicked, this, &MainWindow::onGenerateTerrain);
     connect(backButton, &QPushButton::clicked, this, &MainWindow::onBackToDrawing);
     connect(clearButton, &QPushButton::clicked, [this]() {
@@ -220,15 +219,15 @@ MainWindow::MainWindow(QWidget* parent)
     });
     connect(brushSlider, &QSlider::valueChanged, this, &MainWindow::onBrushSizeChanged);
 
-    // Tamanho inicial
+    // Initial size
     resize(1000, 750);
 }
 
 /**
- * @brief Atualiza o tamanho do pincel ao mover o slider.
- * @param size Tamanho do pincel em pixels.
+ * @brief Updates brush size when slider is moved.
+ * @param size Brush size in pixels.
  *
- * Slot conectado ao sinal QSlider::valueChanged.
+ * Slot connected to QSlider::valueChanged signal.
  */
 void MainWindow::onBrushSizeChanged(int size)
 {
@@ -237,19 +236,19 @@ void MainWindow::onBrushSizeChanged(int size)
 }
 
 /**
- * @brief Processa o desenho e gera o terreno 3D.
+ * @brief Processes drawing and generates 3D terrain.
  *
- * Passos executados:
- * - Captura o desenho do usuário
- * - Redimensiona imagem
- * - Extrai gradiente com Sobel
- * - Calcula distância até pontos desenhados
- * - Forma base da montanha
- * - Aplica ruído Perlin multiescala
- * - Suaviza e aplica erosão leve
- * - Envia heightmap ao renderizador 3D
+ * Steps executed:
+ * - Captures user drawing
+ * - Resizes image
+ * - Extracts gradient with Sobel
+ * - Calculates distance to drawn points
+ * - Forms mountain base
+ * - Applies multi-scale Perlin noise
+ * - Smooths and applies light erosion
+ * - Sends heightmap to 3D renderer
  *
- * Slot conectado ao botão "Gerar Terreno 3D".
+ * Slot connected to "Generate 3D Terrain" button.
  */
 void MainWindow::onGenerateTerrain()
 {
@@ -271,11 +270,11 @@ void MainWindow::onGenerateTerrain()
     Eigen::MatrixXd Gx, Gy;
     ImageToGradient::convert(smallImg, Gx, Gy);
 
-    // Calcular magnitude do gradiente
+    // Calculate gradient magnitude
     Eigen::MatrixXd gradientMagnitude(h, w);
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
-            // Fórmula: |∇I| = √(Gx² + Gy²)
+            // Formula: |∇I| = √(Gx² + Gy²)
             gradientMagnitude(y, x) = sqrt(Gx(y,x)*Gx(y,x) + Gy(y,x)*Gy(y,x));
         }
     }
@@ -365,10 +364,10 @@ void MainWindow::onGenerateTerrain()
                 double baseHeight = 80.0 * decayFactor;
 
 
-                double gradientInfluence = gradientMagnitude(y, x) * 20.0; // Escalar
+                double gradientInfluence = gradientMagnitude(y, x) * 20.0; // Scale
                 double combinedHeight = baseHeight + gradientInfluence;
 
-                // Se for ponto preto original, manter alta
+                // If original black point, keep high
                 for (const auto& blackPoint : blackPoints) {
                     int px = std::get<0>(blackPoint);
                     int py = std::get<1>(blackPoint);
@@ -388,11 +387,11 @@ void MainWindow::onGenerateTerrain()
 
     for (int y = 1; y < h - 1; ++y) {
         for (int x = 1; x < w - 1; ++x) {
-            // Ângulo do gradiente (direção da maior variação)
+            // Gradient angle (direction of greatest variation)
             double angle = atan2(Gy(y, x), Gx(y, x));
 
-            // Aplicar leve inclinação baseada no ângulo
-            double slopeEffect = sin(angle) * 2.0; // Pequeno efeito
+            // Apply light slope based on angle
+            double slopeEffect = sin(angle) * 2.0; // Small effect
             heightmap(y, x) += slopeEffect;
         }
     }
@@ -423,7 +422,7 @@ void MainWindow::onGenerateTerrain()
         }
     }
 
-    // Ruído Perlin
+    // Perlin Noise
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
             double currentHeight = heightmap(y, x);
@@ -442,7 +441,7 @@ void MainWindow::onGenerateTerrain()
         }
     }
 
-    // Suavização
+    // Smoothing
     for (int iter = 0; iter < 3; ++iter) {
         Eigen::MatrixXd smoothed = heightmap;
 
@@ -474,9 +473,9 @@ void MainWindow::onGenerateTerrain()
 }
 
 /**
- * @brief Retorna da página de visualização 3D para a página de desenho.
+ * @brief Returns from 3D visualization page to drawing page.
  *
- * Slot conectado ao botão de voltar.
+ * Slot connected to back button.
  */
 void MainWindow::onBackToDrawing()
 {
@@ -484,14 +483,14 @@ void MainWindow::onBackToDrawing()
 }
 
 /**
- * @brief Aplica erosão suave no heightmap para reduzir ângulos bruscos.
+ * @brief Applies soft erosion to heightmap to reduce sharp angles.
  *
- * A erosão funciona reduzindo alturas onde existe uma diferença
- * significativa em relação a vizinhos mais baixos, simulando
- * desmoronamento de areia/solo.
+ * Erosion works by reducing heights where there is significant
+ * difference compared to lower neighbors, simulating
+ * sand/soil collapse.
  *
- * @param heightmap Matriz de alturas a ser modificada.
- * @param iterations Quantidade de iterações de erosão aplicadas.
+ * @param heightmap Height matrix to be modified.
+ * @param iterations Number of erosion iterations to apply.
  */
 void MainWindow::applySoftErosion(Eigen::MatrixXd& heightmap, int iterations) {
     int h = heightmap.rows();
@@ -504,7 +503,7 @@ void MainWindow::applySoftErosion(Eigen::MatrixXd& heightmap, int iterations) {
             for (int x = 1; x < w - 1; ++x) {
                 double current = heightmap(y, x);
 
-                // Encontrar o vizinho mais baixo
+                // Find lowest neighbor
                 double minNeighbor = current;
                 for (int dy = -1; dy <= 1; dy++) {
                     for (int dx = -1; dx <= 1; dx++) {
@@ -516,14 +515,14 @@ void MainWindow::applySoftErosion(Eigen::MatrixXd& heightmap, int iterations) {
                     }
                 }
 
-                // Suavização com erosão
+                // Smoothing with erosion
                 double diff = current - minNeighbor;
-                if (diff > 10.0) { // Limiar para erosão
-                    // Transferir um pouco de material para baixo
+                if (diff > 10.0) { // Threshold for erosion
+                    // Transfer some material downwards
                     double transfer = diff * 0.05;
                     eroded(y, x) -= transfer;
 
-                    // Distribuir para os vizinhos mais baixos
+                    // Distribute to lower neighbors
                     int lowCount = 0;
                     for (int dy = -1; dy <= 1; dy++) {
                         for (int dx = -1; dx <= 1; dx++) {
@@ -552,4 +551,3 @@ void MainWindow::applySoftErosion(Eigen::MatrixXd& heightmap, int iterations) {
         heightmap = eroded;
     }
 }
-

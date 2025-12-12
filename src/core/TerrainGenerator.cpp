@@ -1,53 +1,52 @@
 /**
-* @file TerrainGenerator.cpp
- * @brief Implementação da classe TerrainGenerator responsável por reconstruir
- *        uma superfície a partir de um campo de gradientes usando a equação de Poisson.
+ * @file TerrainGenerator.cpp
+ * @brief Implementation of TerrainGenerator class for reconstructing
+ *        surfaces from gradient fields using the Poisson equation.
  *
- * O algoritmo integra um campo de derivadas parciais m_dx e m_dy reconstruindo a
- * superfície original Z(x, y) ao resolver a equação:
+ * The algorithm integrates a field of partial derivatives m_dx and m_dy
+ * reconstructing the original surface Z(x, y) by solving:
  *
  *      ∆Z = div(gradient field)
  *
- * onde o lado direito é calculado através das diferenças finitas do gradiente.
+ * where the right-hand side is calculated through finite differences of the gradient.
  */
 
-#include "TerrainGenerator.h"
+#include "../../include/terrain-generator/TerrainGenerator.h"
 #include <Eigen/IterativeLinearSolvers>
 
 /**
- * @brief Gera uma matriz de alturas resolvendo a equação de Poisson para o campo de gradientes.
+ * @brief Generates a height matrix by solving the Poisson equation for the gradient field.
  *
- * A função reconstrói o mapa de alturas a partir dos campos de derivadas m_dx e m_dy.
- * O processo funciona em três etapas:
+ * The function reconstructs the height map from the derivative fields m_dx and m_dy.
+ * The process works in three stages:
  *
- *  1. Montagem do vetor b contendo a divergência do campo de gradiente.
- *  2. Construção da matriz Laplaciana discreta usando diferenças finitas.
- *  3. Resolução do sistema L * Z = b usando método de Conjugate Gradient.
+ *  1. Assembly of vector b containing the divergence of the gradient field.
+ *  2. Construction of the discrete Laplacian matrix using finite differences.
+ *  3. Solving the system L * Z = b using the Conjugate Gradient method.
  *
- * @return Eigen::MatrixXd Matriz (h × w) com as alturas reconstruídas.
+ * @return Eigen::MatrixXd Matrix (h × w) with reconstructed heights.
  *
- * @note Este método resolve um sistema esparso de grande porte, portanto é eficiente
- *       para grandes terrenos.
+ * @note This method solves a large sparse system, therefore it is efficient
+ *       for large terrains.
  */
 Eigen::MatrixXd TerrainGenerator::generate() {
-    int h = m_dx.rows(); ///< Quantidade de linhas do mapa
-    int w = m_dx.cols(); ///< Quantidade de colunas do mapa
-    int n = h * w; ///< Quantidade total de variáveis do sistema
+    int h = m_dx.rows(); ///< Number of rows in the map
+    int w = m_dx.cols(); ///< Number of columns in the map
+    int n = h * w; ///< Total number of variables in the system
 
     // -------------------------------------------------------------------------
-    //  Montar o vetor 'b' contendo a divergência do campo de gradiente
+    //  Assemble vector 'b' containing the divergence of the gradient field
     // -------------------------------------------------------------------------
-
 
     Eigen::VectorXd b(n);
     b.setZero();
 
     /**
-     * A divergência é calculada através de diferenças finitas:
+     * Divergence is calculated through finite differences:
      *
      * div = d/dx(dx) + d/dy(dy)
      *
-     * com tratamento especial para bordas.
+     * with special treatment for edges.
      */
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
@@ -75,23 +74,22 @@ Eigen::MatrixXd TerrainGenerator::generate() {
     }
 
     // -------------------------------------------------------------------------
-    // Construção da matriz Laplaciana esparsa (5-diagonal)
+    // Construction of the sparse Laplacian matrix (5-diagonal)
     // -------------------------------------------------------------------------
 
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplets;
-    triplets.reserve(5 * n); ///< Cada célula contribui com até 5 valores
-
+    triplets.reserve(5 * n); ///< Each cell contributes up to 5 values
 
     /**
-     * Para cada célula, conectamos:
+     * For each cell, we connect:
      *
-     *  - Esquerda
-     *  - Direita
-     *  - Cima
-     *  - Baixo
+     *  - Left
+     *  - Right
+     *  - Up
+     *  - Down
      *
-     * E no próprio índice colocamos o valor negativo da quantidade de vizinhos:
+     * And at the own index we place the negative value of the neighbor count:
      *
      *      L(i,i) = -deg(i)
      */
@@ -113,14 +111,14 @@ Eigen::MatrixXd TerrainGenerator::generate() {
     L.setFromTriplets(triplets.begin(), triplets.end());
 
     // -------------------------------------------------------------------------
-    // Resolver o sistema linear: Lz = b
+    // Solve the linear system: Lz = b
     // -------------------------------------------------------------------------
     Eigen::ConjugateGradient<Eigen::SparseMatrix<double>> solver;
     solver.compute(L);
     Eigen::VectorXd z = solver.solve(b);
 
     // -------------------------------------------------------------------------
-    // Converter o vetor solução para matriz h × w
+    // Convert the solution vector to h × w matrix
     // -------------------------------------------------------------------------
     Eigen::MatrixXd result(h, w);
     for (int y = 0; y < h; ++y)

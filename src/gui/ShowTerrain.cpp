@@ -1,69 +1,69 @@
 /**
  * @file ShowTerrain.cpp
- * @brief Implementação da função responsável por gerar e exibir um terreno 3D usando libigl.
+ * @brief Implementation of function to generate and display 3D terrain using libigl.
  *
- * Este módulo constrói uma malha triangular baseada em uma matriz de alturas
- * e a exibe em um viewer OpenGL fornecido pela biblioteca LibIGL.
+ * This module constructs a triangular mesh based on a height matrix
+ * and displays it in an OpenGL viewer provided by the LibIGL library.
  */
 
-#include "ShowTerrain.h"
-#include "../external/libigl/include/igl/opengl/glfw/Viewer.h"
+#include "../../include/terrain-generator/ShowTerrain.h"
+#include "../../external/libigl/include/igl/opengl/glfw/Viewer.h"
 #include <Eigen/Core>
 #include <cmath>
 
 /**
- * @brief Exibe uma malha 3D baseada em um mapa de alturas.
+ * @brief Displays a 3D mesh based on a heightmap.
  *
- * A função recebe uma matriz de alturas (heights), converte-a em um conjunto de vértices 3D,
- * constrói triangulação para formar uma malha e aplica coloração baseada na altitude.
- * Em seguida, utiliza o LibIGL para renderizar o terreno interativamente.
+ * The function receives a height matrix (heights), converts it to a set of 3D vertices,
+ * constructs triangulation to form a mesh, and applies coloring based on altitude.
+ * Then uses LibIGL to render the terrain interactively.
  *
- * @param heights Matriz (Eigen::MatrixXd) contendo as alturas do terreno.
- *        Cada elemento heights(y, x) representa a elevação no ponto (x, y).
+ * @param heights Matrix (Eigen::MatrixXd) containing terrain heights.
+ *        Each element heights(y, x) represents elevation at point (x, y).
  *
- * @note O terreno é escalonado automaticamente para caber no viewer.
- * @note As cores são interpoladas com base na altura média de cada triângulo.
+ * @note The terrain is automatically scaled to fit the viewer.
+ * @note Colors are interpolated based on the average height of each triangle.
  */
 void showTerrain(const Eigen::MatrixXd& heights)
 {
-    int h = heights.rows(); ///< Altura da grade (número de linhas)
-    int w = heights.cols(); ///< Largura da grade (número de colunas)
+    int h = heights.rows(); ///< Grid height (number of rows)
+    int w = heights.cols(); ///< Grid width (number of columns)
 
     // -------------------------------------------------------------------------
-    // Construção dos vértices
+    // Vertex construction
     // -------------------------------------------------------------------------
 
-    Eigen::MatrixXd V(w * h, 3); ///< Matriz de vértices da malha
+    Eigen::MatrixXd V(w * h, 3); ///< Mesh vertex matrix
     int k = 0;
 
-    /// Escala para normalizar o terreno e centralizá-lo
+    /// Scale to normalize terrain and center it
     double scale = 1.0 / std::max(w, h);
 
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
-            V.row(k++) << (x - w/2.0) * scale, // posição X
-                          (y - h/2.0) * scale, // posição Y
-                          heights(y, x) * scale * 0.5;  // Altura Z
+            V.row(k++) << (x - w/2.0) * scale, // X position
+                          (y - h/2.0) * scale, // Y position
+                          heights(y, x) * scale * 0.5;  // Z height
         }
     }
 
     // -------------------------------------------------------------------------
-    // Construção das faces (triângulos)
+    // Face construction (triangles)
     // -------------------------------------------------------------------------
 
-    Eigen::MatrixXi F((w - 1) * (h - 1) * 2, 3); ///< Conectividade da malha
+    Eigen::MatrixXi F((w - 1) * (h - 1) * 2, 3); ///< Mesh connectivity
     int t = 0;
 
     for (int y = 0; y < h - 1; ++y) {
         for (int x = 0; x < w - 1; ++x) {
             int i = y * w + x;
-            F.row(t++) << i, i + 1, i + w;  //  1º triângulo da célula
-            F.row(t++) << i + 1, i + w + 1, i + w; // 2º triângulo
+            F.row(t++) << i, i + 1, i + w;  //  1st triangle of cell
+            F.row(t++) << i + 1, i + w + 1, i + w; // 2nd triangle
         }
     }
 
     // -------------------------------------------------------------------------
-    // Inicialização do viewer LibIGL
+    // LibIGL viewer initialization
     // -------------------------------------------------------------------------
 
     igl::opengl::glfw::Viewer viewer;
@@ -72,20 +72,19 @@ void showTerrain(const Eigen::MatrixXd& heights)
     viewer.data().set_face_based(true);
 
     // -------------------------------------------------------------------------
-    // Coloração dos triângulos baseada na altura
+    // Triangle coloring based on height
     // -------------------------------------------------------------------------
 
-    Eigen::MatrixXd C(F.rows(), 3); ///< Cores atribuidas a cada face
+    Eigen::MatrixXd C(F.rows(), 3); ///< Colors assigned to each face
 
     double minH = heights.minCoeff();
     double maxH = heights.maxCoeff();
     double range = maxH - minH;
 
-    /// Evita divisão por zero caso todos os pontos tenham a mesma altura
+    /// Avoid division by zero if all points have the same height
     if (range < 1e-6) range = 1.0;
 
-
-    // Calcula a altura média do triângulo
+    // Calculate triangle average height
     for (int i = 0; i < F.rows(); ++i) {
         double avgH = 0;
         for (int j = 0; j < 3; ++j) {
@@ -96,9 +95,9 @@ void showTerrain(const Eigen::MatrixXd& heights)
         }
         avgH /= 3.0;
 
-        double t = (avgH - minH) / range; ///< Normalização (0 a 1)
+        double t = (avgH - minH) / range; ///< Normalization (0 to 1)
 
-        // Gradiente de cores (terra → verde → rocha → neve)
+        // Color gradient (earth → green → rock → snow)
         if (t < 0.1) {
             C(i, 0) = 0.1;
             C(i, 1) = 0.3;
@@ -142,7 +141,7 @@ void showTerrain(const Eigen::MatrixXd& heights)
     }
     viewer.data().set_colors(C);
 
-    // Configurações visuais do viewer
+    // Viewer visual settings
     viewer.data().show_lines = false;
     viewer.core().is_animating = false;
     viewer.core().background_color << 0.05f, 0.05f, 0.05f, 1.0f;

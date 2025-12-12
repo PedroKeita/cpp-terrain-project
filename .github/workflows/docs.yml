@@ -1,0 +1,57 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'include/**'
+      - 'src/**'
+      - 'README.md'
+      - 'Doxyfile'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen graphviz
+        echo "Doxygen version:"
+        doxygen --version
+        
+    - name: Generate Documentation
+      run: |
+        echo "Generating Doxygen documentation..."
+        echo "Current directory:"
+        pwd
+        echo "Files:"
+        ls -la
+        
+        # Clean previous docs
+        rm -rf docs/doxygen
+        
+        # Generate new docs
+        doxygen Doxyfile
+        
+        echo "Documentation generated"
+        echo "Location: docs/doxygen/html/"
+        ls -la docs/doxygen/html/
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/doxygen/html
+        publish_branch: gh-pages
+        force_orphan: true
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'

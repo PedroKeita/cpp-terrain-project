@@ -1,5 +1,5 @@
 #include <QApplication>
-#include "src/MainWindow.h"
+#include "include/terrain-generator/MainWindow.h"
 
 int main(int argc, char *argv[])
 {

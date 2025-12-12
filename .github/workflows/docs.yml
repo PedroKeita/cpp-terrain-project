@@ -19,22 +19,36 @@ jobs:
       - name: Generate Documentation
         run: |
           # Clean previous output
-          rm -rf html public
+          rm -rf docs public
           
           # Generate Doxygen documentation
           echo "Running Doxygen..."
           doxygen Doxyfile
           
           # Check if documentation was generated
-          if [ -d "html" ] && [ -f "html/index.html" ]; then
+          if [ -d "docs/doxygen/html" ] && [ -f "docs/doxygen/html/index.html" ]; then
             echo "Documentation generated successfully"
             # Create deployment directory
             mkdir -p public
-            cp -r html/* public/
+            cp -r docs/doxygen/html/* public/
           else
-            echo "Warning: Documentation not found, creating placeholder"
-            mkdir -p public
-            echo '<h1>Documentation</h1><p>Check Doxyfile configuration</p>' > public/index.html
+            echo "Warning: Documentation not found, checking alternative locations..."
+          
+            # Check if it's in html/
+            if [ -d "html" ] && [ -f "html/index.html" ]; then
+              echo "Found in html/"
+              mkdir -p public
+              cp -r html/* public/
+            # Check if it's in docs/
+            elif [ -d "docs" ] && [ -f "docs/index.html" ]; then
+              echo "Found in docs/"
+              mkdir -p public
+              cp -r docs/* public/
+            else
+              echo "Creating placeholder"
+              mkdir -p public
+              echo '<h1>Documentation</h1><p>Check Doxyfile configuration</p>' > public/index.html
+            fi
           fi
 
       - name: Deploy to GitHub Pages

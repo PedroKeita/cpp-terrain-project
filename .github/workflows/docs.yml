@@ -3,12 +3,6 @@ name: Deploy Documentation
 on:
   push:
     branches: [ main, master, develop ]
-    paths:
-      - 'include/**'
-      - 'src/**'
-      - 'README.md'
-      - 'Doxyfile'
-      - '.github/workflows/docs.yml'
   workflow_dispatch:
 
 jobs:

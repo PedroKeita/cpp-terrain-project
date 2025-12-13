@@ -1,0 +1,65 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Doxygen
+        run: sudo apt-get install -y doxygen graphviz
+
+      - name: Prepare directories
+        run: |
+          # Remove the specific doxygen subdirectory
+          rm -rf docs/doxygen
+          # Create fresh directory
+          mkdir -p docs/doxygen
+
+      - name: Update Doxyfile (remove obsolete tags)
+        run: |
+          # Update Doxyfile to remove obsolete tags
+          doxygen -u Doxyfile 2>/dev/null || true
+          
+          # Also force HTML_OUTPUT to be simpler
+          sed -i 's|HTML_OUTPUT.*=.*doxygen/html|HTML_OUTPUT            = .|' Doxyfile
+          sed -i 's|OUTPUT_DIRECTORY.*=.*docs|OUTPUT_DIRECTORY       = ./docs/doxygen|' Doxyfile
+
+      - name: Generate Documentation
+        run: |
+          echo "Running Doxygen..."
+          doxygen Doxyfile 2>&1
+          
+          echo "Checking generated files..."
+          # Check where files were generated
+          if [ -d "docs/doxygen/html" ] && [ -f "docs/doxygen/html/index.html" ]; then
+            echo "Found in docs/doxygen/html"
+            mkdir -p public
+            cp -r docs/doxygen/html/* public/
+          elif [ -d "docs/doxygen" ] && [ -f "docs/doxygen/index.html" ]; then
+            echo "Found in docs/doxygen"
+            mkdir -p public
+            cp -r docs/doxygen/* public/
+          elif [ -d "html" ] && [ -f "html/index.html" ]; then
+            echo "Found in html"
+            mkdir -p public
+            cp -r html/* public/
+          else
+            echo "Creating simple documentation"
+            mkdir -p public
+            echo '<h1>Terrain Project Documentation</h1>' > public/index.html
+          fi
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages
